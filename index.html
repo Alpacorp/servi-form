@@ -49,16 +49,6 @@
     margin-bottom: 10px;
   }
 
-  input[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    cursor: pointer;
-  }
-
-  input[type="submit"]:hover {
-    background-color: #0056b3;
-  }
-
   label {
     font-size: 14px;
   }
@@ -91,11 +81,17 @@
     border: none;
     width: 100%;
     margin-top: 20px;
+    cursor: pointer;
   }
 
   .buttonSubmit:hover {
     background: linear-gradient(180deg, #009A44, #56C271);
     background-image: linear-gradient(rgb(0, 154, 68), rgb(86, 194, 113));
+  }
+
+  .buttonSubmit:disabled {
+    background: #ccc;
+    cursor: not-allowed;
   }
 
   input[type="text"]:focus,
@@ -134,10 +130,12 @@
           He leído y acepto la <a href="https://www.servientrega.com/wps/portal/politica-tratamiento-informacion/"
             target="_blank" title="">Política de tratamiento de datos</a>.
         </label>
-        <button class="buttonSubmit" type="submit">Enviar Información</button>
+        <button class="buttonSubmit" type="submit" id="submitButton" disabled>Enviar Información</button>
       </form>
 
       <script type="text/javascript">
+
+        const submitButton = document.getElementById('submitButton');
 
         document.addEventListener('DOMContentLoaded', function () {
           // Verificar la URL actual
@@ -148,11 +146,35 @@
           const form = document.getElementById('formRegister');
 
           // Mostrar u ocultar el formulario según la URL
-          if (currentURL.starsWith(baseUrl)) {
+          if (currentURL.includes(baseUrl)) {
             form.style.display = 'block';  // Mostrar el formulario
           } else {
             form.style.display = 'none';   // Ocultar el formulario
           }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+          const form = document.getElementById('userForm');
+          const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]');
+          const checkbox = document.getElementById('terms');
+
+          function checkFormValidity() {
+            if (!submitButton) {
+              console.error("El botón de envío no se encuentra en el DOM.");
+              return;
+            }
+
+            const allFilled = Array.from(inputs).every(input => input.value.trim() !== '') && checkbox.checked;
+            submitButton.disabled = !allFilled;
+          }
+
+          inputs.forEach(input => {
+            input.addEventListener('input', checkFormValidity);
+          });
+
+          checkbox.addEventListener('change', checkFormValidity);
+
+          checkFormValidity();
         });
 
         document.getElementById('name').addEventListener('input', function (e) {
@@ -180,6 +202,8 @@
 
         document.getElementById('userForm').addEventListener('submit', async function (e) {
           e.preventDefault();
+
+          submitButton.disabled = true;
 
           try {
             // Recoger los datos del formulario
@@ -260,6 +284,7 @@
           } finally {
             // Limpiar el formulario
             document.getElementById('userForm').reset();
+            submitButton.disabled = true;
           }
         });
       </script>
